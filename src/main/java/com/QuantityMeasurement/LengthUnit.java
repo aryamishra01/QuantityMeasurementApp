@@ -1,25 +1,48 @@
 package com.QuantityMeasurement;
 
-//Enum to define supported Length Units and their conversion factor to base unit (FEET)
+/**
+ * Standalone LengthUnit enum.
+ * 
+ * RESPONSIBILITY:
+ * - Stores conversion factor relative to base unit (FEET)
+ * - Converts value to base unit (feet)
+ * - Converts value from base unit (feet)
+ * 
+ * This class now fully owns conversion logic (SRP).
+ */
 public enum LengthUnit {
- FEET(1.0),            // Base unit
- INCHES(1.0 / 12),     // 1 inch = 1/12 feet
- YARDS(3.0),           // 1 yard = 3 feet
- CENTIMETERS(0.0328084); // 1 cm ≈ 0.0328084 feet
 
- private final double toFeetFactor;
+    FEET(1.0),                // Base unit
+    INCHES(1.0 / 12),         // 1 inch = 1/12 feet
+    YARDS(3.0),               // 1 yard = 3 feet
+    CENTIMETERS(1.0 / 30.48); // 1 cm = 1/30.48 feet
 
- LengthUnit(double toFeetFactor) {
-     this.toFeetFactor = toFeetFactor;
- }
+    // Conversion factor relative to base unit (FEET)
+    private final double conversionFactor;
 
- // Convert a value from this unit to FEET (base unit)
- public double toFeet(double value) {
-     return value * toFeetFactor;
- }
+    // Constructor
+    LengthUnit(double conversionFactor) {
+        this.conversionFactor = conversionFactor;
+    }
 
- // Convert a value from FEET (base unit) to this unit
- public double fromFeet(double feetValue) {
-     return feetValue / toFeetFactor;
- }
+    /**
+     * Converts a value in this unit to base unit (feet).
+     */
+    public double convertToBaseUnit(double value) {
+        return value * conversionFactor;
+    }
+
+    /**
+     * Converts a value from base unit (feet) to this unit.
+     */
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / conversionFactor;
+    }
+
+    /**
+     * Getter for conversion factor (used in unit tests).
+     */
+    public double getConversionFactor() {
+        return conversionFactor;
+    }
 }

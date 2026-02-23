@@ -1,32 +1,24 @@
 package com.QuantityMeasurement;
 
-/**
- * Enum representing Weight Units.
- * Base unit is KILOGRAM.
- */
-public enum WeightUnit {
+public enum WeightUnit implements Unit {
 
-    KILOGRAM(1.0),       // Base unit
-    GRAM(0.001),         // 1 gram = 0.001 kg
-    POUND(0.453592);     // 1 pound = 0.453592 kg
+    GRAM(1.0),
+    KILOGRAM(1000.0),
+    TONNE(1000000.0);
 
-    private final double toKilogramFactor;
+    private final double toGramFactor;
 
-    WeightUnit(double toKilogramFactor) {
-        this.toKilogramFactor = toKilogramFactor;
+    WeightUnit(double toGramFactor) {
+        this.toGramFactor = toGramFactor;
     }
 
-    /**
-     * Converts given value to base unit (Kilogram)
-     */
+    @Override
     public double toBase(double value) {
-        return value * toKilogramFactor;
+        return value * toGramFactor;
     }
 
-    /**
-     * Converts value from base unit (Kilogram) to this unit
-     */
+    @Override
     public double fromBase(double baseValue) {
-        return baseValue / toKilogramFactor;
+        return baseValue / toGramFactor;
     }
 }

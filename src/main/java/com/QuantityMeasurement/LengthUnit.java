@@ -1,24 +1,23 @@
 /*
  * Enum representing supported length units.
- * Each unit stores its conversion factor relative to base unit (Feet).
+ * All conversion factors are relative to base unit (Feet).
  */
 package com.QuantityMeasurement;
 
 public enum LengthUnit {
 
-    FEET(1.0),
-    INCH(1.0 / 12.0);
+    FEET(12.0),             // 1 foot = 12 inches
+    INCHES(1.0),            // Base unit
+    YARDS(36.0),            // 1 yard = 36 inches
+    CENTIMETERS(0.393701);  // 1 cm = 0.393701 inches
 
-    private final double conversionFactorToFeet;
+    private final double conversionFactorToInches;
 
-    LengthUnit(double conversionFactorToFeet) {
-        this.conversionFactorToFeet = conversionFactorToFeet;
+    LengthUnit(double conversionFactorToInches) {
+        this.conversionFactorToInches = conversionFactorToInches;
     }
 
-    /*
-     * Returns conversion factor to base unit (Feet).
-     */
-    public double getConversionFactorToFeet() {
-        return conversionFactorToFeet;
+    public double toInches(double value) {
+        return value * conversionFactorToInches;
     }
 }

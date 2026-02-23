@@ -1,148 +1,162 @@
-/*
- * Test class for UC6 - Addition of Two Length Units (Same Category)
- * Covers addition of same and cross-unit lengths, zero, negative,
- * large/small values, and commutativity.
- */
-
 package com.QuantityMeasurement;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
+/**
+ * JUnit 5 Test class for QuantityLength (UC7: Addition with Target Unit Specification)
+ * Tests addition of lengths with explicit target units, commutativity, zero/negative values, 
+ * and invalid inputs.
+ */
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QuantityMeasurementAppTest {
 
-    private static final double EPSILON = 1e-6;
+    // Tolerance for floating point comparison (for approximate equality)
+    private static final double EPSILON = 0.001;
 
-    /*
-     * Same-unit addition (Feet + Feet)
+    /**
+     * Test addition with explicit target unit = FEET
+     * 1 FEET + 12 INCHES = 2 FEET
      */
     @Test
-    public void testAddition_SameUnit_FeetPlusFeet() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(2.0, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(3.0, LengthUnit.FEET), sum);
-    }
-
-    /*
-     * Same-unit addition (Inches + Inches)
-     */
-    @Test
-    public void testAddition_SameUnit_InchPlusInch() {
-        QuantityLength q1 = new QuantityLength(6.0, LengthUnit.INCHES);
-        QuantityLength q2 = new QuantityLength(6.0, LengthUnit.INCHES);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(12.0, LengthUnit.INCHES), sum);
-    }
-
-    /*
-     * Cross-unit addition (Feet + Inches)
-     */
-    @Test
-    public void testAddition_CrossUnit_FeetPlusInches() {
+    void testAddition_ExplicitTargetUnit_Feet() {
         QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
         QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(2.0, LengthUnit.FEET), sum);
+
+        QuantityLength result = q1.add(q2, LengthUnit.FEET);
+
+        assertEquals(2.0, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.FEET, result.getUnit());
     }
 
-    /*
-     * Cross-unit addition (Inches + Feet)
+    /**
+     * Test addition with explicit target unit = INCHES
+     * 1 FEET + 12 INCHES = 24 INCHES
      */
     @Test
-    public void testAddition_CrossUnit_InchPlusFeet() {
-        QuantityLength q1 = new QuantityLength(12.0, LengthUnit.INCHES);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(24.0, LengthUnit.INCHES), sum);
+    void testAddition_ExplicitTargetUnit_Inches() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+
+        QuantityLength result = q1.add(q2, LengthUnit.INCHES);
+
+        assertEquals(24.0, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.INCHES, result.getUnit());
     }
 
-    /*
-     * Cross-unit addition (Yard + Feet)
+    /**
+     * Test addition with explicit target unit = YARDS
+     * 1 FEET + 12 INCHES ≈ 0.667 YARDS
      */
     @Test
-    public void testAddition_CrossUnit_YardPlusFeet() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.YARDS);
-        QuantityLength q2 = new QuantityLength(3.0, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(2.0, LengthUnit.YARDS), sum);
+    void testAddition_ExplicitTargetUnit_Yards() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+
+        QuantityLength result = q1.add(q2, LengthUnit.YARDS);
+
+        assertEquals(0.667, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.YARDS, result.getUnit());
     }
 
-    /*
-     * Cross-unit addition (Centimeters + Inches)
+    /**
+     * Test addition with explicit target unit = CENTIMETERS
+     * 1 INCH + 1 INCH ≈ 5.08 CM
      */
     @Test
-    public void testAddition_CrossUnit_CentimeterPlusInch() {
-        QuantityLength q1 = new QuantityLength(2.54, LengthUnit.CENTIMETERS);
+    void testAddition_ExplicitTargetUnit_Centimeters() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.INCHES);
         QuantityLength q2 = new QuantityLength(1.0, LengthUnit.INCHES);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(5.08, LengthUnit.CENTIMETERS), sum);
+
+        QuantityLength result = q1.add(q2, LengthUnit.CENTIMETERS);
+
+        assertEquals(5.08, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.CENTIMETERS, result.getUnit());
     }
 
-    /*
-     * Addition is commutative
+    /**
+     * Test commutativity of addition with explicit target unit
+     * add(A,B,target) should equal add(B,A,target)
      */
     @Test
-    public void testAddition_Commutativity() {
-        QuantityLength a = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength b = new QuantityLength(12.0, LengthUnit.INCHES);
+    void testAddition_ExplicitTargetUnit_Commutativity() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
 
-        QuantityLength sum1 = a.add(b);
-        QuantityLength sum2 = b.add(a).convertTo(LengthUnit.FEET);
+        QuantityLength result1 = q1.add(q2, LengthUnit.YARDS);
+        QuantityLength result2 = q2.add(q1, LengthUnit.YARDS);
 
-        assertEquals(sum1.getValue(), sum2.getValue(), EPSILON);
+        assertEquals(result1.getValue(), result2.getValue(), EPSILON);
+        assertEquals(result1.getUnit(), result2.getUnit());
     }
 
-    /*
-     * Addition with zero
+    /**
+     * Test addition when one operand is zero
+     * 5 FEET + 0 INCHES ≈ 1.667 YARDS
      */
     @Test
-    public void testAddition_WithZero() {
+    void testAddition_WithZero() {
         QuantityLength q1 = new QuantityLength(5.0, LengthUnit.FEET);
         QuantityLength q2 = new QuantityLength(0.0, LengthUnit.INCHES);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(5.0, LengthUnit.FEET), sum);
+
+        QuantityLength result = q1.add(q2, LengthUnit.YARDS);
+
+        assertEquals(1.667, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.YARDS, result.getUnit());
     }
 
-    /*
-     * Addition with negative value
+    /**
+     * Test addition with negative values
+     * 5 FEET + (-2 FEET) = 3 FEET → 36 INCHES
      */
     @Test
-    public void testAddition_NegativeValues() {
+    void testAddition_WithNegativeValues() {
         QuantityLength q1 = new QuantityLength(5.0, LengthUnit.FEET);
         QuantityLength q2 = new QuantityLength(-2.0, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(3.0, LengthUnit.FEET), sum);
+
+        QuantityLength result = q1.add(q2, LengthUnit.INCHES);
+
+        assertEquals(36.0, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.INCHES, result.getUnit());
     }
 
-    /*
-     * Null operand should throw exception
+    /**
+     * Test addition with null target unit
+     * Should throw IllegalArgumentException
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddition_NullSecondOperand() {
+    @Test
+    void testAddition_NullTargetUnit() {
         QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        q1.add(null);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+
+        assertThrows(IllegalArgumentException.class, () -> q1.add(q2, null));
     }
 
-    /*
-     * Addition with large values
+    /**
+     * Test addition from large unit to small unit scale
+     * 1000 FEET + 500 FEET → 18000 INCHES
      */
     @Test
-    public void testAddition_LargeValues() {
-        QuantityLength q1 = new QuantityLength(1e6, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(1e6, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(2e6, LengthUnit.FEET), sum);
+    void testAddition_LargeToSmallScale() {
+        QuantityLength q1 = new QuantityLength(1000.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(500.0, LengthUnit.FEET);
+
+        QuantityLength result = q1.add(q2, LengthUnit.INCHES);
+
+        assertEquals(18000.0, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.INCHES, result.getUnit());
     }
 
-    /*
-     * Addition with small values
+    /**
+     * Test addition from small unit to large unit scale
+     * 12 INCHES + 12 INCHES ≈ 0.667 YARDS
      */
     @Test
-    public void testAddition_SmallValues() {
-        QuantityLength q1 = new QuantityLength(0.001, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(0.002, LengthUnit.FEET);
-        QuantityLength sum = q1.add(q2);
-        assertEquals(new QuantityLength(0.003, LengthUnit.FEET), sum);
+    void testAddition_SmallToLargeScale() {
+        QuantityLength q1 = new QuantityLength(12.0, LengthUnit.INCHES);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+
+        QuantityLength result = q1.add(q2, LengthUnit.YARDS);
+
+        assertEquals(0.667, result.getValue(), EPSILON);
+        assertEquals(LengthUnit.YARDS, result.getUnit());
     }
 }

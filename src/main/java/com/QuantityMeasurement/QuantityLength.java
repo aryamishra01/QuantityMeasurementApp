@@ -1,18 +1,18 @@
-/**
- * Represents a length quantity with value and unit.
- * Supports conversion, equality, and addition.
- */
-
 package com.QuantityMeasurement;
 
-public class QuantityLength {
-
+// Immutable class representing a quantity of length
+public final class QuantityLength {
     private final double value;
     private final LengthUnit unit;
 
+    // Constructor
     public QuantityLength(double value, LengthUnit unit) {
-        if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
-        if (!Double.isFinite(value)) throw new IllegalArgumentException("Value must be finite");
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Value must be a finite number");
+        }
         this.value = value;
         this.unit = unit;
     }
@@ -25,55 +25,39 @@ public class QuantityLength {
         return unit;
     }
 
-    // Convert to another unit
-    public QuantityLength convertTo(LengthUnit targetUnit) {
-        if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
-        double valueInFeet = this.value * unit.getConversionFactor();
-        double convertedValue = valueInFeet / targetUnit.getConversionFactor();
-        return new QuantityLength(convertedValue, targetUnit);
-    }
-
-    // Static conversion utility
-    public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
-        if (sourceUnit == null || targetUnit == null)
-            throw new IllegalArgumentException("Units cannot be null");
-        if (!Double.isFinite(value))
-            throw new IllegalArgumentException("Value must be finite");
-
-        double valueInFeet = value * sourceUnit.getConversionFactor();
-        return valueInFeet / targetUnit.getConversionFactor();
-    }
-
-    // Addition of two QuantityLength objects, result in first operand's unit
+    // Add two QuantityLength objects and return result in the unit of the first operand
     public QuantityLength add(QuantityLength other) {
-        if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+        return add(other, this.unit); // Default to first operand's unit
+    }
 
-        double thisInFeet = this.value * this.unit.getConversionFactor();
-        double otherInFeet = other.value * other.unit.getConversionFactor();
+    // Add two QuantityLength objects and return result in explicitly specified target unit
+    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other length cannot be null");
+        }
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
 
+        // Convert both operands to base unit (FEET)
+        double thisInFeet = this.unit.toFeet(this.value);
+        double otherInFeet = other.unit.toFeet(other.value);
+
+        // Sum values in base unit
         double sumInFeet = thisInFeet + otherInFeet;
-        double sumInTargetUnit = sumInFeet / this.unit.getConversionFactor();
 
-        return new QuantityLength(sumInTargetUnit, this.unit);
+        // Convert sum to target unit
+        double sumInTargetUnit = targetUnit.fromFeet(sumInFeet);
+
+        // Round to 3 decimal places for readability
+        sumInTargetUnit = Math.round(sumInTargetUnit * 1000.0) / 1000.0;
+
+        // Return new immutable QuantityLength object
+        return new QuantityLength(sumInTargetUnit, targetUnit);
     }
 
-    // Overriding equals
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof QuantityLength)) return false;
-        QuantityLength other = (QuantityLength) obj;
-
-        double epsilon = 1e-6;
-        double thisInFeet = this.value * this.unit.getConversionFactor();
-        double otherInFeet = other.value * other.unit.getConversionFactor();
-
-        return Math.abs(thisInFeet - otherInFeet) < epsilon;
-    }
-
-    // Overriding toString
     @Override
     public String toString() {
-        return String.format("%.6f %s", value, unit);
+        return "Quantity(" + value + ", " + unit + ")";
     }
 }

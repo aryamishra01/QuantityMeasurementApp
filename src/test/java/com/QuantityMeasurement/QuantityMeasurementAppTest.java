@@ -1,218 +1,116 @@
 package com.QuantityMeasurement;
 
-/**
- * JUnit 5 Test class for QuantityLength
- * 
- * Covers:
- * - Equality checks (same unit & cross unit)
- * - Addition with and without target unit
- * - Explicit target unit conversions
- * - Commutativity
- * - Zero and negative values
- * - Large/small scale conversions
- * - Null and invalid inputs
- */
-
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
-public class QuantityMeasurementAppTest {
+/**
+ * UC9 - Weight Test Cases
+ */
+class QuantityMeasurementAppTest {
 
-    // Tolerance for floating point comparison
-    private static final double EPSILON = 0.001;
+    private static final double EPSILON = 0.0001;
 
-    //EQUALITY TEST CASES
+    /* ================= EQUALITY ================= */
 
-    /**
-     * Test equality when both values and units are same
-     * 1 FEET == 1 FEET
-     */
     @Test
-    void testEquality_SameUnitSameValue() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
-
-        assertTrue(q1.equals(q2));
+    void testSameUnitEquality() {
+        assertEquals(
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM));
     }
 
-    /**
-     * Test equality with different units but same length
-     * 12 INCHES == 1 FEET
-     */
     @Test
-    void testEquality_DifferentUnitSameValue() {
-        QuantityLength q1 = new QuantityLength(12.0, LengthUnit.INCHES);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
-
-        assertTrue(q1.equals(q2));
+    void testCrossUnitEquality() {
+        assertEquals(
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                new QuantityWeight(1000.0, WeightUnit.GRAM));
     }
 
-    /**
-     * Test inequality when values are different
-     * 1 FEET != 2 FEET
-     */
     @Test
-    void testEquality_DifferentValues() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(2.0, LengthUnit.FEET);
-
-        assertFalse(q1.equals(q2));
+    void testInequality() {
+        assertNotEquals(
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                new QuantityWeight(2.0, WeightUnit.KILOGRAM));
     }
 
-    /**
-     * Test equality with null object
-     */
     @Test
-    void testEquality_NullObject() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-
-        assertFalse(q1.equals(null));
+    void testNullEquality() {
+        assertNotEquals(
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                null);
     }
 
+    /* ================= CONVERSION ================= */
 
-    // ADDITION TEST CASES
-    /**
-     * Test addition without target unit (default behavior)
-     * 1 FEET + 12 INCHES = 2 FEET
-     */
     @Test
-    void testAddition_DefaultTarget() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+    void testKilogramToGram() {
+        QuantityWeight result =
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM)
+                        .convertTo(WeightUnit.GRAM);
 
-        QuantityLength result = q1.add(q2);
-
-        assertEquals(2.0, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.FEET, result.getUnit());
+        assertEquals(1000.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test addition with explicit target unit = INCHES
-     * 1 FEET + 12 INCHES = 24 INCHES
-     */
     @Test
-    void testAddition_TargetUnitInches() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+    void testGramToKilogram() {
+        QuantityWeight result =
+                new QuantityWeight(1000.0, WeightUnit.GRAM)
+                        .convertTo(WeightUnit.KILOGRAM);
 
-        QuantityLength result = q1.add(q2, LengthUnit.INCHES);
-
-        assertEquals(24.0, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.INCHES, result.getUnit());
+        assertEquals(1.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test addition with explicit target unit = YARDS
-     * 1 FEET + 12 INCHES ≈ 0.667 YARDS
-     */
     @Test
-    void testAddition_TargetUnitYards() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
+    void testPoundToKilogram() {
+        QuantityWeight result =
+                new QuantityWeight(2.20462, WeightUnit.POUND)
+                        .convertTo(WeightUnit.KILOGRAM);
 
-        QuantityLength result = q1.add(q2, LengthUnit.YARDS);
-
-        assertEquals(0.667, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.YARDS, result.getUnit());
+        assertEquals(1.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test commutativity of addition
-     * add(A,B,target) == add(B,A,target)
-     */
+    /* ================= ADDITION ================= */
+
     @Test
-    void testAddition_Commutativity() {
-        QuantityLength q1 = new QuantityLength(2.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(24.0, LengthUnit.INCHES);
-
-        QuantityLength result1 = q1.add(q2, LengthUnit.FEET);
-        QuantityLength result2 = q2.add(q1, LengthUnit.FEET);
-
-        assertEquals(result1.getValue(), result2.getValue(), EPSILON);
-        assertEquals(result1.getUnit(), result2.getUnit());
-    }
-
-    /**
-     * Test addition when one operand is zero
-     * 5 FEET + 0 INCHES = 5 FEET
-     */
-    @Test
-    void testAddition_WithZero() {
-        QuantityLength q1 = new QuantityLength(5.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(0.0, LengthUnit.INCHES);
-
-        QuantityLength result = q1.add(q2, LengthUnit.FEET);
-
-        assertEquals(5.0, result.getValue(), EPSILON);
-    }
-
-    /**
-     * Test addition with negative values
-     * 5 FEET + (-2 FEET) = 3 FEET
-     */
-    @Test
-    void testAddition_WithNegativeValues() {
-        QuantityLength q1 = new QuantityLength(5.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(-2.0, LengthUnit.FEET);
-
-        QuantityLength result = q1.add(q2, LengthUnit.FEET);
+    void testAdditionSameUnit() {
+        QuantityWeight result =
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM)
+                        .add(new QuantityWeight(2.0, WeightUnit.KILOGRAM));
 
         assertEquals(3.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test addition with null target unit
-     * Should throw IllegalArgumentException
-     */
     @Test
-    void testAddition_NullTargetUnit() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
+    void testAdditionCrossUnit() {
+        QuantityWeight result =
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM)
+                        .add(new QuantityWeight(1000.0, WeightUnit.GRAM));
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            q1.add(q2, null)
-        );
+        assertEquals(2.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test addition with null object
-     * Should throw IllegalArgumentException
-     */
     @Test
-    void testAddition_NullQuantity() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+    void testAdditionWithTargetUnit() {
+        QuantityWeight result =
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM)
+                        .add(new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                                WeightUnit.GRAM);
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            q1.add(null, LengthUnit.FEET)
-        );
+        assertEquals(2000.0, result.getValue(), EPSILON);
     }
 
-    /**
-     * Test large scale addition
-     * 1000 FEET + 500 FEET = 1500 FEET
-     */
+    /* ================= VALIDATION ================= */
+
     @Test
-    void testAddition_LargeScale() {
-        QuantityLength q1 = new QuantityLength(1000.0, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(500.0, LengthUnit.FEET);
-
-        QuantityLength result = q1.add(q2, LengthUnit.FEET);
-
-        assertEquals(1500.0, result.getValue(), EPSILON);
+    void testNullUnitInConstructor() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new QuantityWeight(1.0, null));
     }
 
-    /**
-     * Test small to large unit conversion
-     * 12 INCHES + 12 INCHES ≈ 0.667 YARDS
-     */
     @Test
-    void testAddition_SmallToLargeScale() {
-        QuantityLength q1 = new QuantityLength(12.0, LengthUnit.INCHES);
-        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
-
-        QuantityLength result = q1.add(q2, LengthUnit.YARDS);
-
-        assertEquals(0.667, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.YARDS, result.getUnit());
+    void testNullAddition() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new QuantityWeight(1.0, WeightUnit.KILOGRAM)
+                        .add(null));
     }
 }

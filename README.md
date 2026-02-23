@@ -1,4 +1,4 @@
-# UC4 – Equality Comparison with Unit Type Validation (Weight)
+# UC3 – Equality Comparison with Value Validation (Weight)
 
 ---
 
@@ -6,41 +6,34 @@
 
 Enhance the Quantity Measurement Application to:
 
-- Compare two weight quantities
-- Ensure equality only when:
-  - Values are equal
-  - Units are same
-- Validate object type properly
-- Override `equals()` method safely
+- Compare two weight objects
+- Return **true** if values are equal
+- Return **false** if values are different
+- Ensure proper object comparison logic
 
-In this UC, we introduce the concept of **unit type validation**.
+In this UC, we introduce **value-based equality comparison**.
 
 ---
 
-## 🎯 Objective of UC4
+## 🎯 Objective of UC3
 
-1. Introduce weight unit:
-   - Gram (g)
+1. Create a `Quantity` class
+2. Store weight value
+3. Override `equals()` method
+4. Compare only based on value
+5. Handle:
+   - Same reference case
+   - Null case
+   - Different object type case
 
-2. Ensure:
-   - Same reference returns true
-   - Null comparison returns false
-   - Different object types return false
-   - Different units return false
-   - Same value and same unit return true
+> ⚠ Unit concept will be introduced in later UCs.
 
 ---
 
 # 🧠 Core Concept Used
 
-While overriding `equals()` in Java, we must:
+In Java, object comparison using `==` checks reference.  
+To compare values, we must override:
 
-✔ Check reference equality  
-✔ Check null  
-✔ Check class type  
-✔ Compare unit type  
-✔ Compare values  
-
-This ensures correct object comparison.
-
----
+```java
+public boolean equals(Object obj)

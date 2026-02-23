@@ -1,41 +1,24 @@
+/*
+ * Application class for UC3 demonstration.
+ */
+
 package com.QuantityMeasurement;
 
-/*
- * Main application class.
- * Contains static methods to check equality.
- */
 public class QuantityMeasurementApp {
 
     public static void main(String[] args) {
 
-        System.out.println("Input: 1.0 ft and 1.0 ft");
-        System.out.println("Output: Equal (" + checkFeetEquality(1.0, 1.0) + ")");
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        System.out.println("Input: Quantity(1.0, FEET) and Quantity(12.0, INCH)");
+        System.out.println("Output: Equal (" + q1.equals(q2) + ")");
+
+        QuantityLength q3 = new QuantityLength(1.0, LengthUnit.INCH);
+        QuantityLength q4 = new QuantityLength(1.0, LengthUnit.INCH);
 
         System.out.println();
-
-        System.out.println("Input: 1.0 inch and 1.0 inch");
-        System.out.println("Output: Equal (" + checkInchEquality(1.0, 1.0) + ")");
-    }
-
-    /*
-     * Checks equality between two Feet values.
-     */
-    public static boolean checkFeetEquality(double value1, double value2) {
-
-        Feet feet1 = new Feet(value1);
-        Feet feet2 = new Feet(value2);
-
-        return feet1.equals(feet2);
-    }
-
-    /*
-     * Checks equality between two Inches values.
-     */
-    public static boolean checkInchEquality(double value1, double value2) {
-
-        Inches inch1 = new Inches(value1);
-        Inches inch2 = new Inches(value2);
-
-        return inch1.equals(inch2);
+        System.out.println("Input: Quantity(1.0, INCH) and Quantity(1.0, INCH)");
+        System.out.println("Output: Equal (" + q3.equals(q4) + ")");
     }
 }

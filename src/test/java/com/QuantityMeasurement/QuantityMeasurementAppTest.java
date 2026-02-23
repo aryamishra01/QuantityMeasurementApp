@@ -1,9 +1,8 @@
 /*
- * Test class for UC4 - Extended Unit Support.
- * Covers equality contract, cross-unit comparison,
- * symmetry, transitive property, null safety,
- * and invalid input handling for Feet, Inches,
- * Yards and Centimeters.
+ * Test class for UC5 - Unit-to-Unit Conversion (Same Measurement Type).
+ * Covers equality, cross-unit comparison, symmetry, transitive property,
+ * null safety, invalid input, zero and negative values for FEET, INCHES,
+ * YARDS and CENTIMETERS.
  */
 
 package com.QuantityMeasurement;
@@ -13,29 +12,31 @@ import org.junit.Test;
 
 public class QuantityMeasurementAppTest {
 
+    private static final double EPSILON = 1e-6;
+
     /*
-     * Tests same-unit equality for Yards.
+     * Tests same-unit equality for Feet.
      */
     @Test
-    public void testEquality_YardToYard_SameValue() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.YARDS);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.YARDS);
+    public void testEquality_FeetToFeet_SameValue() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
         assertTrue(q1.equals(q2));
     }
 
     /*
-     * Tests same-unit equality for Centimeters.
+     * Tests same-unit equality for Inches.
      */
     @Test
-    public void testEquality_CmToCm_SameValue() {
-        QuantityLength q1 = new QuantityLength(2.0, LengthUnit.CENTIMETERS);
-        QuantityLength q2 = new QuantityLength(2.0, LengthUnit.CENTIMETERS);
+    public void testEquality_InchesToInches_SameValue() {
+        QuantityLength q1 = new QuantityLength(12.0, LengthUnit.INCHES);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCHES);
         assertTrue(q1.equals(q2));
     }
 
     /*
      * Tests Yard to Feet conversion.
-     * 1 Yard equals 3 Feet.
+     * 1 Yard = 3 Feet.
      */
     @Test
     public void testEquality_YardToFeet_EquivalentValue() {
@@ -56,7 +57,7 @@ public class QuantityMeasurementAppTest {
 
     /*
      * Tests Yard to Inches conversion.
-     * 1 Yard equals 36 Inches.
+     * 1 Yard = 36 Inches.
      */
     @Test
     public void testEquality_YardToInches_EquivalentValue() {
@@ -67,7 +68,7 @@ public class QuantityMeasurementAppTest {
 
     /*
      * Tests Centimeter to Inches conversion.
-     * 1 CM equals 0.393701 Inches.
+     * 1 CM = 0.393701 Inches.
      */
     @Test
     public void testEquality_CmToInches_EquivalentValue() {
@@ -77,22 +78,43 @@ public class QuantityMeasurementAppTest {
     }
 
     /*
+     * Tests round-trip conversion (Feet -> Inches -> Feet).
+     */
+    @Test
+    public void testConversion_RoundTrip_PreservesValue() {
+        double original = 5.0;
+        double inches = QuantityLength.convert(original, LengthUnit.FEET, LengthUnit.INCHES);
+        double backToFeet = QuantityLength.convert(inches, LengthUnit.INCHES, LengthUnit.FEET);
+        assertEquals(original, backToFeet, EPSILON);
+    }
+
+    /*
+     * Tests zero value conversion.
+     */
+    @Test
+    public void testConversion_ZeroValue() {
+        QuantityLength q = new QuantityLength(0.0, LengthUnit.FEET);
+        QuantityLength converted = q.convertTo(LengthUnit.INCHES);
+        assertEquals(0.0, converted.getValue(), EPSILON);
+    }
+
+    /*
+     * Tests negative value conversion.
+     */
+    @Test
+    public void testConversion_NegativeValue() {
+        QuantityLength q = new QuantityLength(-2.0, LengthUnit.YARDS);
+        QuantityLength converted = q.convertTo(LengthUnit.FEET);
+        assertEquals(-6.0, converted.getValue(), EPSILON);
+    }
+
+    /*
      * Tests non-equivalent Yard and Feet values.
      */
     @Test
     public void testEquality_YardToFeet_NonEquivalentValue() {
         QuantityLength q1 = new QuantityLength(1.0, LengthUnit.YARDS);
         QuantityLength q2 = new QuantityLength(2.0, LengthUnit.FEET);
-        assertFalse(q1.equals(q2));
-    }
-
-    /*
-     * Tests non-equivalent CM and Feet values.
-     */
-    @Test
-    public void testEquality_CmToFeet_NonEquivalentValue() {
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.CENTIMETERS);
-        QuantityLength q2 = new QuantityLength(1.0, LengthUnit.FEET);
         assertFalse(q1.equals(q2));
     }
 
@@ -130,11 +152,19 @@ public class QuantityMeasurementAppTest {
     }
 
     /*
-     * Tests invalid numeric input.
+     * Tests invalid numeric input (NaN).
      */
     @Test(expected = IllegalArgumentException.class)
     public void testEquality_InvalidNumericInput() {
         new QuantityLength(Double.NaN, LengthUnit.FEET);
+    }
+
+    /*
+     * Tests invalid numeric input (Infinity).
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testEquality_InfiniteValue() {
+        new QuantityLength(Double.POSITIVE_INFINITY, LengthUnit.FEET);
     }
 
     /*

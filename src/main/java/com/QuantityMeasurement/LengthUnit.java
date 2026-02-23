@@ -1,10 +1,8 @@
 package com.QuantityMeasurement;
 
-/**
- * LengthUnit Enum
- *
- * Represents different length measurement units.
- * Base unit = INCHES
+/*
+ * Enum representing Length units.
+ * Base unit: FOOT
  */
 public enum LengthUnit implements Unit {
 
@@ -12,19 +10,20 @@ public enum LengthUnit implements Unit {
     INCH(1.0 / 12.0),
     YARD(3.0);
 
-    private final double toFeetFactor;
+    private final double conversionFactor;
 
-    LengthUnit(double toFeetFactor) {
-        this.toFeetFactor = toFeetFactor;
+    LengthUnit(double conversionFactor) {
+        this.conversionFactor = conversionFactor;
+    }
+
+    // Converts given value to base unit (Feet)
+    @Override
+    public double toBaseUnit(double value) {
+        return value * conversionFactor;
     }
 
     @Override
-    public double toBase(double value) {
-        return value * toFeetFactor;
-    }
-
-    @Override
-    public double fromBase(double baseValue) {
-        return baseValue / toFeetFactor;
+    public String getType() {
+        return "LENGTH";
     }
 }

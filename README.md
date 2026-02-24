@@ -338,3 +338,159 @@ Supports:
 🔗 [UC12 Implementation ](https://github.com/aryamishra01/QuantityMeasurementApp/tree/feature/UC12-SubtractionDivision)
 
 ---
+
+# ✅ UC13: Centralized Arithmetic Logic
+
+## 📖 Description
+Architectural refinement introducing:
+
+- Centralized arithmetic method inside `Quantity`
+- Removal of duplicated conversion logic
+- Functional interface–based operation handling
+
+Supports:
+
+- Equality  
+- Addition  
+- Subtraction  
+- Division  
+- Cross-unit conversion  
+- Cross-category validation  
+
+⚠ No new functionality added.  
+All previous use cases (UC1–UC12) remain unchanged and fully functional.
+
+---
+
+## 🧠 Concepts Mastered
+
+✅ DRY Principle (Don’t Repeat Yourself)  
+✅ Refactoring Without Changing Behavior  
+✅ Functional Interfaces (`BinaryOperator`)  
+✅ Centralized Logic Design  
+✅ Clean Architecture Refinement  
+✅ Backward Compatibility Preservation  
+
+---
+
+## 🧪 Sample Test Cases
+
+- testAdditionStillWorks()  
+- testSubtractionStillWorks()  
+- testDivisionStillWorks()  
+- testCrossCategoryValidation()  
+
+---
+
+🔗 [UC13 Implementation](https://github.com/aryamishra01/QuantityMeasurementApp/tree/feature/UC13-CentralizedArithmeticLogic)
+
+Refactored `Quantity` class introducing:
+
+```java
+private Quantity<U> performOperation(
+    Quantity<U> other,
+    U targetUnit,
+    BinaryOperator<Double> operator
+)
+```
+
+Public methods delegate:
+
+```java
+add()      → performOperation(..., Double::sum)
+subtract() → performOperation(..., (a, b) -> a - b)
+```
+
+---
+
+# ✅ UC14: Temperature Measurement
+
+## 📖 Description
+Extension of Generic Quantity framework introducing:
+
+- `TemperatureUnit` enum
+- Non-linear conversion logic
+- Offset-based transformations
+
+Supports:
+
+- Equality  
+- Addition  
+- Subtraction  
+- Cross-unit conversion  
+- Cross-category validation  
+
+No modification required in `Quantity` class or centralized arithmetic logic.
+
+---
+
+## 🌡 Temperature Units
+
+Base Unit: **Celsius**
+
+Supported Units:
+
+- Celsius  
+- Fahrenheit  
+- Kelvin  
+
+---
+
+## 🔄 Conversion Logic
+
+### Celsius ↔ Fahrenheit
+
+```
+°F = (°C × 9/5) + 32
+°C = (°F − 32) × 5/9
+```
+
+### Celsius ↔ Kelvin
+
+```
+K = °C + 273.15
+°C = K − 273.15
+```
+
+---
+
+## 🧠 Concepts Mastered
+
+✅ Non-linear Unit Conversion  
+✅ Offset-Based Transformation  
+✅ Enum Constant-Specific Behavior  
+✅ Polymorphism through Method Overriding  
+✅ Open–Closed Principle Compliance  
+✅ Architectural Scalability Validation  
+
+---
+
+## 🧪 Sample Test Cases
+
+- testCelsiusFahrenheitEquality()  
+- testCelsiusKelvinEquality()  
+- testTemperatureConversion()  
+- testTemperatureAddition()  
+- testCrossCategoryRestriction()  
+
+---
+
+🔗 [UC14 Implementation](https://github.com/aryamishra01/QuantityMeasurementApp/tree/feature/UC14-TemperatureMeasurement)
+
+```java
+enum TemperatureUnit implements IMeasurable
+```
+
+Each constant overrides:
+
+```java
+double toBase(double value);
+double fromBase(double baseValue);
+```
+
+Framework now supports both:
+
+- Linear transformations (Length, Weight, Volume)
+- Non-linear transformations (Temperature)
+
+Without modifying the core arithmetic engine.

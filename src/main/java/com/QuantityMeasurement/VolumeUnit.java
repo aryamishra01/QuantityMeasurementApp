@@ -1,14 +1,10 @@
 package com.QuantityMeasurement;
 
-/*
- * Enum representing Volume units.
- * Base unit: LITER
- */
-public enum VolumeUnit implements Unit {
+public enum VolumeUnit implements IMeasurable {
 
-    LITER(1.0),
-    MILLILITER(0.001),
-    GALLON(3.78);
+    LITRE(1.0),
+    MILLILITRE(0.001),
+    GALLON(3.78541);
 
     private final double conversionFactor;
 
@@ -16,14 +12,23 @@ public enum VolumeUnit implements Unit {
         this.conversionFactor = conversionFactor;
     }
 
-    // Converts given value to base unit (Liter)
     @Override
-    public double toBaseUnit(double value) {
+    public double getConversionFactor() {
+        return conversionFactor;
+    }
+
+    @Override
+    public double convertToBaseUnit(double value) {
         return value * conversionFactor;
     }
 
     @Override
-    public String getType() {
-        return "VOLUME";
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / conversionFactor;
+    }
+
+    @Override
+    public String getUnitName() {
+        return name();
     }
 }

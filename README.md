@@ -1,52 +1,54 @@
-# UC6 – Quantity Measurement with Unit Comparison (Weight)
+## ✅ UC6: Weight Measurement Equality
+
+📖 **Description**  
+Enhances the Quantity Measurement App to support **weight unit comparison**.  
+Allows equality comparison across different weight units (Gram, Kilogram, Tonne) by internally converting values to a **base unit (Gram)** and handling floating-point precision safely.  
+This use case focuses only on **comparison**; arithmetic operations (addition, subtraction) will be implemented in later UCs.
 
 ---
 
-## 📌 Problem Statement
+🔎 **Preconditions**  
 
-Enhance the Quantity Measurement Application to:
-
-- Support **Weight unit comparison**
-- Compare values across different weight units
-- Convert units internally into a common base unit
-- Handle floating-point precision safely
-
-In this UC, we implement **comparison only** (no addition yet — that comes in UC10).
+- `WeightUnit` enum is defined with valid units (Gram, Kilogram, Tonne).  
+- `Quantity<WeightUnit>` objects can be created with a numeric value and a unit.  
+- The system supports base unit normalization.  
 
 ---
 
-## 🎯 Objective of UC6
+🔄 **Main Flow**  
 
-1. Support weight units:
-   - Gram (g)
-   - Kilogram (kg)
-   - Tonne (t)
-
-2. Allow:
-   - Equality comparison between different weight units
-   - Cross-unit comparison using base conversion
-   - Precision-safe comparison
+1. User creates two `Quantity<WeightUnit>` objects with value and unit.  
+2. Both quantities are **converted to the base unit (Gram)** internally.  
+3. Floating-point values are compared using `Double.compare()` or a tolerance-based approach to handle precision safely.  
+4. Result is returned:  
+   - `true` if values are equal  
+   - `false` if values differ  
 
 ---
 
-# 🧠 Core Concept Used
+📤 **Postconditions**  
 
-For accurate comparison:
-
-✔ Convert all units into a **base unit (Gram)**  
-✔ Compare base values  
-✔ Use tolerance to avoid floating-point errors  
+- Returns `true` if the two weights are equivalent across units.  
+- Returns `false` if weights are not equal.  
 
 ---
 
-# 🔁 Conversion Table (Base Unit = Gram)
+🧠 **Concepts Learned (UC6)**  
 
-| Unit | Conversion to Gram |
-|------|-------------------|
-| 1 Kilogram | 1000 grams |
-| 1 Tonne | 1,000,000 grams |
-| 1 Gram | 1 gram |
+✅ Generic Programming (`Quantity<U extends IMeasurable>`)  
+✅ Enum-based conversion (`WeightUnit`)  
+✅ Base unit normalization for cross-unit comparison  
+✅ Floating-point precision handling  
+✅ Multi-category scalability (preparing for arithmetic in future UCs)  
 
 ---
 
+🧪 **Sample Test Cases**  
+
+- `testWeightEquality_SameUnit()` → 1000 g == 1000 g → `true`  
+- `testWeightEquality_DifferentUnit()` → 1 kg == 1000 g → `true`  
+- `testWeightEquality_TonneComparison()` → 0.001 t == 1 kg → `true`  
+- `testWeightEquality_DifferentValues()` → 500 g != 1 kg → `false`  
+
+---
 

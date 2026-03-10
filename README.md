@@ -494,3 +494,80 @@ Framework now supports both:
 - Non-linear transformations (Temperature)
 
 Without modifying the core arithmetic engine.
+
+---
+
+# ✅ UC15: N-Tier Architecture Refactoring
+
+## 📖 Description
+Refactoring of the Quantity Measurement Application into a **clean N-Tier Architecture**.
+
+Introduces layered separation:
+
+- Controller Layer  
+- Service Layer  
+- Repository Layer  
+- DTO Layer  
+
+Improves:
+
+- Maintainability  
+- Scalability  
+- Separation of Concerns  
+
+The system continues to support:
+
+- Unit conversion  
+- Equality comparison  
+- Cross-unit validation  
+
+---
+
+## 🏗 Architecture Layers
+
+**Controller**  
+Handles incoming requests and delegates them to the service layer.
+
+**Service**  
+Contains the core business logic for quantity conversion and equality checks.
+
+**Repository**  
+Implements an in-memory cache using the Singleton pattern.
+
+**DTO**  
+Transfers quantity data between layers.
+
+---
+
+## 🔄 Supported Measurements
+
+- Length  
+- Weight  
+- Volume  
+- Temperature  
+
+---
+
+## 🧠 Concepts Mastered
+
+✅ N-Tier Architecture  
+✅ Service-Oriented Design  
+✅ DTO Pattern  
+✅ Singleton Pattern  
+✅ Enum-Based Unit Modeling  
+✅ Separation of Concerns  
+
+---
+
+## 🧪 Sample Test Cases
+
+- givenFeet_WhenConvertedToInches()  
+- givenFeetAndInches_WhenEqual()  
+- givenKilogram_WhenConvertedToGram()  
+- givenLitre_WhenConvertedToMillilitre()  
+- givenCelsius_WhenConvertedToFahrenheit()  
+- givenInvalidUnit_ShouldThrowException()  
+
+🔗 [UC15 Implementation](https://github.com/aryamishra01/QuantityMeasurementApp/tree/feature/UC15-N-Tier)
+
+---

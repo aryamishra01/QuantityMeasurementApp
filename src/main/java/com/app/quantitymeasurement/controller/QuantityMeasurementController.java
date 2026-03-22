@@ -1,74 +1,51 @@
 package com.app.quantitymeasurement.controller;
 
+import com.app.quantitymeasurement.dto.CompareRequestDTO;
 import com.app.quantitymeasurement.dto.QuantityDTO;
-import com.app.quantitymeasurement.exception.QuantityMeasurementException;
 import com.app.quantitymeasurement.service.IQuantityMeasurementService;
-import com.app.quantitymeasurement.service.QuantityMeasurementServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Thin controller layer that validates incoming DTOs and delegates to service implementation.
- * This class contains no business logic and is suitable to be adapted into a REST controller later.
- */
-
+@RestController
+@RequestMapping("/quantity")
 public class QuantityMeasurementController {
 
-    private final IQuantityMeasurementService service;
+    @Autowired
+    private IQuantityMeasurementService service;
 
-    public QuantityMeasurementController() {
-        this.service = new QuantityMeasurementServiceImpl();
+    @GetMapping("/hello")
+    public String hello() {
+        return "Spring Boot Working ";
     }
 
-    // Allow injection for tests
-    public QuantityMeasurementController(IQuantityMeasurementService service) {
-        this.service = service;
+    // ✅ Compare
+    @PostMapping("/compare")
+    public QuantityDTO compare(@RequestBody CompareRequestDTO request) {
+        return service.compare(request.getQ1(), request.getQ2());
     }
 
-    public String performComparison(QuantityDTO left, QuantityDTO right) {
-        validateDto(left);
-        validateDto(right);
-        QuantityDTO res = service.compare(left, right);
-        return formatResult(res);
+    // ✅ Convert
+    @PostMapping("/convert")
+    public QuantityDTO convert(@RequestBody QuantityDTO source,
+                               @RequestParam String targetUnit) {
+        return service.convert(source, targetUnit);
     }
 
-    public String performConversion(QuantityDTO source, String targetUnit) {
-        validateDto(source);
-        if (targetUnit == null || targetUnit.trim().isEmpty())
-            throw QuantityMeasurementException.invalidConversion("targetUnit required");
-        QuantityDTO res = service.convert(source, targetUnit);
-        return formatResult(res);
+    // ✅ Add
+    @PostMapping("/add")
+    public QuantityDTO add(@RequestBody CompareRequestDTO request) {
+        return service.add(request.getQ1(), request.getQ2());
     }
 
-    public String performAddition(QuantityDTO a, QuantityDTO b) {
-        validateDto(a);
-        validateDto(b);
-        QuantityDTO res = service.add(a, b);
-        return formatResult(res);
+    // ✅ Subtract
+    @PostMapping("/subtract")
+    public QuantityDTO subtract(@RequestBody CompareRequestDTO request) {
+        return service.subtract(request.getQ1(), request.getQ2());
     }
 
-    public String performSubtraction(QuantityDTO a, QuantityDTO b) {
-        validateDto(a);
-        validateDto(b);
-        QuantityDTO res = service.subtract(a, b);
-        return formatResult(res);
-    }
-
-    public String performDivision(QuantityDTO a, QuantityDTO b) {
-        validateDto(a);
-        validateDto(b);
-        QuantityDTO res = service.divide(a, b);
-        return formatResult(res);
-    }
-
-    private void validateDto(QuantityDTO dto) {
-        if (dto == null) throw QuantityMeasurementException.invalidConversion("QuantityDTO is null");
-        if (dto.getMeasurementType() == null || dto.getMeasurementType().trim().isEmpty())
-            throw QuantityMeasurementException.invalidConversion("measurementType required");
-        if (dto.getUnit() == null || dto.getUnit().trim().isEmpty())
-            throw QuantityMeasurementException.invalidConversion("unit required");
-    }
-
-    private String formatResult(QuantityDTO dto) {
-        if (dto == null) return "null";
-        return String.format("Result: value=%s, unit=%s, type=%s", dto.getValue(), dto.getUnit(), dto.getMeasurementType());
+    // ✅ Divide
+    @PostMapping("/divide")
+    public QuantityDTO divide(@RequestBody CompareRequestDTO request) {
+        return service.divide(request.getQ1(), request.getQ2());
     }
 }

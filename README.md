@@ -1,100 +1,195 @@
-# ✅ UC17: Spring Framework Integration - REST Services and JPA
+# ✅ UC18: Spring Security - JWT Authentication & Google OAuth2 for Quantity Measurement
 
 ## 📖 Description
-UC17 transforms the Quantity Measurement Application into a **production-grade Spring Boot REST service**.
+UC18 secures the Quantity Measurement Application by introducing enterprise-grade authentication and authorization using Spring Security, JWT (JSON Web Tokens), and Google OAuth2.
 
-### Key Improvements:
-- Spring Boot → eliminates manual configuration
-- Spring Data JPA → replaces JDBC boilerplate
-- Spring MVC → exposes REST APIs
-- Swagger → interactive API documentation
-- Actuator → application monitoring
+In UC17, all REST endpoints were publicly accessible — anyone could call `/api/v1/quantities/compare` without any identity. UC18 changes this completely:
 
-✔ Fully backward compatible with UC1–UC16
+- Every API endpoint now requires a valid JWT token  
+- Users can register and login using username/password (JWT)  
+- Users can also sign in using Google OAuth2 (Sign in with Google)  
+- Both methods return the same JWT token format for consistent API access  
+- Role-based access control restricts certain endpoints to ADMIN users only  
+
+UC18 is fully backward compatible with UC1–UC17. All business logic and REST endpoints are preserved — they now simply require authentication.
+
+---
+
+## 🎯 Objective
+- Implement JWT-based authentication (register + login)  
+- Implement Google OAuth2 sign-in with auto user creation  
+- Protect all `/api/v1/quantities/**` endpoints with JWT  
+- Implement role-based access control (`ROLE_USER`, `ROLE_ADMIN`)  
+- Centralize authentication logic in AuthService  
+- Integrate with Swagger UI for easy token-based API testing  
+- Persist users and roles using Spring Data JPA  
 
 ---
 
-## 🎯 Objectives
-- Expose measurement operations as REST APIs
-- Replace JDBC with Spring Data JPA
-- Enable Dependency Injection (IoC)
-- Add centralized exception handling
-- Implement validation using annotations
-- Enable Swagger & Actuator
-
----
-## 🏗 Architecture
+## 🏗 Updated Architecture
 ```
-Client (Postman / Swagger UI)
+Client (Swagger / Postman / Browser)
 ↓
-REST Controller (@RestController)
+JwtAuthFilter (intercepts every request)
 ↓
-Service Layer (@Service)
+SecurityConfig (which URLs need auth)
+↙ ↘
+JWT Login Google OAuth2
+↓ ↓
+AuthService OAuth2SuccessHandler
+↓ ↓
+UserRepository UserRepository (auto-create user)
+↓ ↓
+JWT Token returned
 ↓
-Repository Layer (@Repository - JPA)
+Client sends: Authorization: Bearer <token>
 ↓
-H2 Database
-
+REST Controller processes request
 ```
+---
+
+## 🔐 Authentication Flow
+
+### JWT Flow (username/password)
+1. `POST /auth/register` → User created in DB → JWT returned  
+2. `POST /auth/login` → Password verified → JWT returned  
+3. Copy token from response  
+4. Add to Swagger: Authorize → `Bearer <token>`  
+5. All API calls now authenticated ✅  
 
 ---
 
-## 🔄 UC16 vs UC17
-
-| Aspect | UC16 | UC17 |
-|------|------|------|
-| HTTP | ❌ None | ✅ REST API |
-| Data Access | JDBC | Spring Data JPA |
-| DI | Manual | @Autowired |
-| JSON | Manual | Auto |
-| Exception | Try-catch | @ControllerAdvice |
-| Validation | Manual | @Valid |
-| Docs | None | Swagger |
-| Monitoring | None | Actuator |
+### Google OAuth2 Flow
+1. Browser → `http://localhost:8080/oauth2/authorization/google`  
+2. Google login page appears  
+3. User signs in with Gmail  
+4. OAuth2SuccessHandler creates user in DB (if new)  
+5. JWT token returned as JSON response  
+6. Copy token → use in Swagger as `Bearer <token>`  
+7. All API calls now authenticated ✅  
 
 ---
 
-## 🔹 REST Endpoints
+## 🔹 New Components
 
-| Method | URL | Description |
-|--------|-----|------------|
-| POST | `/api/v1/quantities/compare` | Compare quantities |
-| POST | `/api/v1/quantities/add` | Add quantities |
-| POST | `/api/v1/quantities/subtract` | Subtract |
-| POST | `/api/v1/quantities/divide` | Divide |
-| POST | `/api/v1/quantities/convert` | Convert |
-| GET | `/api/v1/quantities/history/operation/{operation}` | History by operation |
-| GET | `/api/v1/quantities/history/type/{type}` | History by type |
+### Security Package
+| Class | Purpose |
+|------|--------|
+| JwtUtils | Generates, validates, parses JWT |
+| JwtAuthFilter | Intercepts requests and validates JWT |
+| UserDetailsServiceImpl | Loads user from DB |
+| OAuth2SuccessHandler | Handles Google login |
 
 ---
 
-## 🧱 Layers Overview
+### Model Layer
+| Class | Purpose |
+|------|--------|
+| User | Stores user info, provider, roles |
+| Role | ROLE_USER / ROLE_ADMIN |
 
-### Controller Layer
-- `@RestController`
-- Handles HTTP requests
-- Returns JSON responses
-
-### Service Layer
-- Business logic
-- Uses `@Service`
+---
 
 ### Repository Layer
-- `JpaRepository`
-- No SQL required
-
-### Entity Layer
-- `@Entity`
-- Maps Java class to DB table
+| Interface | Purpose |
+|----------|--------|
+| UserRepository | findByEmail, existsByEmail |
+| RoleRepository | findByName |
 
 ---
 
-## ⚙️ application.properties
+### Controller Layer
+| Class | Endpoints |
+|------|----------|
+| AuthController | `/auth/register`, `/auth/login` |
+| UserController | `/users/me`, `/users/all` |
 
-```properties
-spring.datasource.url=jdbc:h2:mem:quantitymeasurementdb
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.h2.console.enabled=true
-springdoc.swagger-ui.path=/swagger-ui.html
-management.endpoints.web.exposure.include=health,info
-server.port=8080
+---
+
+## 🔒 Security Rules
+
+| URL | Access |
+|----|-------|
+| `/auth/**` | Public |
+| `/oauth2/**` | Public |
+| `/swagger-ui/**` | Public |
+| `/h2-console/**` | Public |
+| `/users/all` | ADMIN only |
+| `/users/me` | Authenticated |
+| `/api/v1/quantities/**` | Authenticated |
+
+---
+
+## 🗄 Database Tables
+
+```sql
+CREATE TABLE users (...);
+CREATE TABLE roles (...);
+CREATE TABLE user_roles (...);
+
+INSERT INTO roles (name) VALUES ('ROLE_USER');
+INSERT INTO roles (name) VALUES ('ROLE_ADMIN');
+```
+---
+## 🧠 Spring Security Concepts Learned
+
+| Concept | Implementation |
+|--------|---------------|
+| JWT generation | `JwtUtils.generateTokenFromEmail()` using jjwt library |
+| JWT validation | `JwtUtils.validateToken()` — checks signature + expiry |
+| JWT filter | `JwtAuthFilter` extends `OncePerRequestFilter` |
+| Stateless sessions | `SessionCreationPolicy.STATELESS` — no server-side sessions |
+| Password encoding | `BCryptPasswordEncoder` — industry standard hashing |
+| UserDetails | `UserDetailsServiceImpl.loadUserByUsername()` |
+| Authentication | `AuthenticationManager.authenticate()` |
+| OAuth2 | `oauth2Login().successHandler(OAuth2SuccessHandler)` |
+| Role-based access | `@PreAuthorize("hasRole('ADMIN')")` |
+| Method security | `@EnableMethodSecurity` on `SecurityConfig` |
+| Public URLs | `.requestMatchers(...).permitAll()` |
+| Protected URLs | `.anyRequest().authenticated()` |
+
+---
+
+## 📤 Postconditions
+
+- All `/api/v1/quantities/**` endpoints require a valid JWT ✅  
+- `POST /auth/register` creates user with BCrypt password and ROLE_USER ✅  
+- `POST /auth/login` authenticates and returns JWT ✅  
+- Google OAuth2 sign-in auto-creates user and returns JWT ✅  
+- `GET /users/me` returns current user profile ✅  
+- `GET /users/all` accessible only to ROLE_ADMIN ✅  
+- Swagger UI works with Authorize → Bearer token ✅  
+- H2 console remains accessible without auth ✅  
+- All UC1–UC17 business logic preserved ✅  
+
+---
+
+## 🚀 Architectural Evolution
+
+| Use Case | Capability Added |
+|---------|----------------|
+| UC1–UC8 | Length measurement operations |
+| UC9 | Weight measurement |
+| UC10 | Generic quantity architecture |
+| UC11 | Volume measurement |
+| UC12 | Subtraction & Division |
+| UC13 | Centralized arithmetic logic |
+| UC14 | Temperature measurement |
+| UC15 | N-Tier architecture |
+| UC16 | JDBC database persistence |
+| UC17 | Spring Boot REST API + JPA |
+| UC18 | JWT + Google OAuth2 + Role-based Security |
+
+---
+
+## 🔥 Key Achievement
+
+UC18 transforms the application from an open REST API into a **secured, production-ready service**.
+
+The system now supports:
+
+- Stateless JWT authentication — scales horizontally without session storage  
+- Google OAuth2 — enterprise-grade social login  
+- Role-based authorization — fine-grained access control  
+- BCrypt password hashing — secure credential storage  
+- Foundation ready for: refresh tokens, email verification, rate limiting, and cloud deployment  

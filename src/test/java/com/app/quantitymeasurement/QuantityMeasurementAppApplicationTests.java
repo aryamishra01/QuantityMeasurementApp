@@ -4,14 +4,37 @@ import com.app.quantitymeasurement.dto.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// Use random port and provide a test security configuration that permits all requests
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+            "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration",
+            "spring.main.allow-bean-definition-overriding=true"
+        })
 class QuantityMeasurementAppApplicationTests {
 
     @Autowired TestRestTemplate restTemplate;
+
+    @TestConfiguration
+    @EnableMethodSecurity
+    static class TestSecurityConfig {
+        @Bean
+        @Primary
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            return http.build();
+        }
+    }
 
     @Test
     void contextLoads() {
@@ -51,6 +74,7 @@ class QuantityMeasurementAppApplicationTests {
         ResponseEntity<QuantityMeasurementDTO> response = restTemplate.postForEntity(
             "/api/v1/quantities/add", input, QuantityMeasurementDTO.class);
 
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().isError()).isTrue();
     }
 
@@ -65,6 +89,7 @@ class QuantityMeasurementAppApplicationTests {
             "/api/v1/quantities/compare", input, QuantityMeasurementDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getResultValue()).isEqualTo("true");
     }
 

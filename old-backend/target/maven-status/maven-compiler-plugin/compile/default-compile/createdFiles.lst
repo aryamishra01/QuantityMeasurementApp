@@ -1,0 +1,4 @@
+com\app\quantitymeasurement\repository\QuantityMeasurementRepository.class
+com\app\quantitymeasurement\model\QuantityMeasurementEntity.class
+com\app\quantitymeasurement\model\Role$RoleName.class
+com\app\quantitymeasurement\model\Role.class
